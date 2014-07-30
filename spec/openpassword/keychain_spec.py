@@ -86,8 +86,15 @@ class KeychainSpec:
         keychain = self._get_simple_keychain()
         keychain.initialise("somepassword")
 
-    def it_adds_the_item_to_the_keychain_with_the_item_id_as_key(self):
-        keychain = self._get_simple_keychain()
+    @patch("openpassword.abstract.DataSource")
+    def it_adds_the_item_to_the_keychain_with_the_item_id_as_key(self, data_source_class):
+        data_source = data_source_class.return_value
+        data_source.verify_password.return_value = True
+        data_source.is_keychain_initialised.return_value = True
+
+        keychain = Keychain(data_source)
+        keychain.unlock('correctpassword')
+
         item = {'id': 'new_item_id'}
         keychain.append(item)
         eq_(keychain['new_item_id'], item)
@@ -118,6 +125,11 @@ class KeychainSpec:
         keychain = Keychain(data_source)
         keychain.unlock("password")
         keychain.set_password("foobar")
+
+    @raises(KeychainLockedException)
+    def it_throws_an_exception_when_iterating_over_a_locked_keychain(self):
+        keychain = self._get_simple_keychain()
+        list(keychain)
 
     def _get_non_initialised_keychain(self):
         keychain = self._get_simple_keychain()

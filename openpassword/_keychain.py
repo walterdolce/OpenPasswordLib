@@ -54,4 +54,6 @@ class Keychain(object):
         return item in self._items.values()
 
     def __iter__(self):
+        if self.locked:
+            raise KeychainLockedException
         return iter(self._items)

@@ -50,7 +50,7 @@ def step_impl(context):
 @then('I should be able to see its contents')
 def step_impl(context):
     try:
-        items = list(context.keychain)
+        list(context.keychain)
     except TypeError:
         assert False
 
